@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 
-export const todoFromModalOpenState = atom<boolean>({
-  key: "todoFromModalOpenState",
+export const todoFormModalOpenState = atom<boolean>({
+  key: "todoFormModalOpenState",
   default: false,
 });

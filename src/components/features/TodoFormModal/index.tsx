@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "@emotion/styled/macro";
-import Modal from "../../../components/Modal";
-import { selectedDateState, todoListState } from "../TodoList/atom";
-import { useRecoilValue, useRecoilState, useRecoilCallback } from "recoil";
+import { useRecoilCallback, useRecoilState, useRecoilValue } from "recoil";
 import { v4 as uuidv4 } from "uuid";
-import { todoFromModalOpenState } from "./atom";
+
+import { todoFormModalOpenState } from "./atom";
+import Modal from "../../Modal";
+import { selectedDateState, todoListState } from "../TodoList/atom";
 import { getSimpleDateFormat } from "../../../utils";
 
-const ModalBody = styled.div`
+const Container = styled.div`
   width: 100vw;
   max-width: 386px;
   padding: 8px;
@@ -42,17 +43,21 @@ const Card = styled.div`
 `;
 
 const TodoFormModal: React.FC = () => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   const [todo, setTodo] = useState<string>("");
 
   const selectedDate = useRecoilValue(selectedDateState);
   const todoList = useRecoilValue(todoListState);
-  const [isOpen, setIsOpen] = useRecoilState(todoFromModalOpenState);
 
-  const handleClose = () => setIsOpen(false);
+  const [isOpen, setIsOpen] = useRecoilState(todoFormModalOpenState);
 
   const reset = () => {
     setTodo("");
+    inputRef.current?.focus();
   };
+
+  const handleClose = () => setIsOpen(false);
 
   const addTodo = useRecoilCallback(
     ({ snapshot, set }) =>
@@ -61,7 +66,7 @@ const TodoFormModal: React.FC = () => {
 
         const newTodo = {
           id: uuidv4(),
-          content: "",
+          content: todo,
           done: false,
           date: selectedDate,
         };
@@ -79,23 +84,26 @@ const TodoFormModal: React.FC = () => {
     }
   };
 
-  const hadleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTodo(e.target.value);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <ModalBody>
+      <Container>
         <Card>
           <Date>{getSimpleDateFormat(selectedDate)}</Date>
           <InputTodo
+            ref={inputRef}
             placeholder="새로운 이벤트"
             onKeyPress={handleKeyPress}
             value={todo}
-            onChange={hadleChange}
+            onChange={handleChange}
           />
         </Card>
-      </ModalBody>
+      </Container>
     </Modal>
   );
 };
+
+export default TodoFormModal;
